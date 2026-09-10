@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: kvant-planner
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: DATABASE_URL
+        sync: false          # Neon-оос авсан холболтын мөрийг Render дээр гараар оруулна
+      - key: SESSION_SECRET
+        generateValue: true  # Render автоматаар тогтмол нууц түлхүүр үүсгэнэ
+      - key: ADMIN_USER
+        value: admin
+      - key: ADMIN_PASSWORD
+        sync: false          # Эхний админы нууц үгийг Render дээр гараар оруулна
+      - key: NODE_ENV
+        value: production

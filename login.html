@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Нэвтрэх — Квант Майнинг ХХК</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🔧</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=PT+Sans:wght@400;700&display=swap">
+<style>
+:root{
+  --ground:#EEF1F4;--surface:#FFFFFF;--ink:#171E25;--muted:#5E6B77;--faint:#8593A0;
+  --line:#DBE1E7;--line-strong:#C4CDD6;--steel:#1F5673;--brand:#1BB8E0;--amber:#E8891A;
+  --err:#D64545;--err-bg:#FBE7E7;
+  --shadow:0 10px 40px rgba(23,30,37,.12);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0F151A;--surface:#161E25;--ink:#E7EDF2;--muted:#9DAAB6;--faint:#6B7883;
+    --line:#28333C;--line-strong:#37454F;--steel:#4FA8CE;--brand:#28C4EC;--amber:#F0A340;
+    --err:#E86B6B;--err-bg:#38201F;--shadow:0 10px 40px rgba(0,0,0,.55);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px 16px;
+  background:
+    radial-gradient(1200px 500px at 50% -10%, color-mix(in srgb,var(--brand) 16%, transparent), transparent),
+    var(--ground);
+  color:var(--ink);font-family:"PT Sans","Segoe UI",system-ui,sans-serif;font-size:14px}
+.card{width:100%;max-width:390px;background:var(--surface);border:1px solid var(--line);
+  border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.top{padding:26px 30px 6px;text-align:center}
+.top img{height:52px;width:auto}
+.top h1{font-family:"Oswald",sans-serif;font-weight:600;font-size:18px;letter-spacing:.4px;
+  text-transform:uppercase;margin:16px 0 2px}
+.top p{color:var(--muted);font-size:12.5px;margin:0}
+form{padding:20px 30px 26px;display:flex;flex-direction:column;gap:14px}
+.fld{display:flex;flex-direction:column;gap:5px}
+.fld label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+.fld input{border:1px solid var(--line-strong);background:var(--ground);color:var(--ink);
+  border-radius:9px;padding:11px 12px;font-family:inherit;font-size:14px}
+.fld input:focus{outline:2px solid var(--steel);outline-offset:1px;border-color:var(--steel)}
+button{appearance:none;border:0;background:var(--steel);color:#fff;font-family:"Oswald",sans-serif;
+  font-weight:500;letter-spacing:.6px;text-transform:uppercase;font-size:14px;padding:12px;
+  border-radius:9px;cursor:pointer;margin-top:4px;transition:filter .15s}
+button:hover{filter:brightness(1.08)}
+button:disabled{opacity:.6;cursor:default}
+.err{background:var(--err-bg);color:var(--err);border-radius:9px;padding:9px 12px;font-size:13px;
+  display:none}
+.err.show{display:block}
+.foot{color:var(--faint);font-size:11px;text-align:center;padding:0 30px 22px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <img src="/logo.png" alt="Квант Майнинг ХХК">
+      <h1>Засварын планер</h1>
+      <p>Системд нэвтэрч орно уу</p>
+    </div>
+    <form id="f" autocomplete="on">
+      <div class="err" id="err"></div>
+      <div class="fld">
+        <label for="u">Нэвтрэх нэр</label>
+        <input type="text" id="u" name="username" autocomplete="username" autofocus required>
+      </div>
+      <div class="fld">
+        <label for="p">Нууц үг</label>
+        <input type="password" id="p" name="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" id="btn">Нэвтрэх</button>
+    </form>
+    <div class="foot">Квант Майнинг ХХК · ХАБЭА / Засвар үйлчилгээний алба</div>
+  </div>
+<script>
+// Аль хэдийн нэвтэрсэн бол шууд руу оруулах
+fetch("/api/me").then(function(r){ if(r.ok) location.replace("/"); });
+
+var f=document.getElementById("f"), err=document.getElementById("err"), btn=document.getElementById("btn");
+f.addEventListener("submit", async function(e){
+  e.preventDefault();
+  err.classList.remove("show");
+  btn.disabled=true; btn.textContent="Нэвтэрч байна…";
+  try{
+    var res=await fetch("/api/login",{
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({username:document.getElementById("u").value, password:document.getElementById("p").value})
+    });
+    var data=await res.json();
+    if(!res.ok){ throw new Error(data.error||"Нэвтрэх боломжгүй"); }
+    location.replace("/");
+  }catch(ex){
+    err.textContent=ex.message; err.classList.add("show");
+    btn.disabled=false; btn.textContent="Нэвтрэх";
+  }
+});
+</script>
+</body>
+</html>

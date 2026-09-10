@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="mn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Засварын сарын планер — Квант Майнинг ХХК</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>🔧</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=PT+Sans:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+:root{
+  --ground:#EEF1F4;--surface:#FFFFFF;--surface-2:#F6F8FA;--ink:#171E25;--muted:#5E6B77;
+  --faint:#8593A0;--line:#DBE1E7;--line-strong:#C4CDD6;--steel:#1F5673;--amber:#E8891A;
+  --brand:#1BB8E0;--weekend:#EAEEF2;--today:#FFF4E3;
+  --st-plan:#6B7B8C;--st-plan-bg:#EBEEF2;--st-prog:#1F87C7;--st-prog-bg:#E3F1FB;
+  --st-done:#2E9E6B;--st-done-bg:#E4F5EC;--st-delay:#D64545;--st-delay-bg:#FBE7E7;
+  --st-wait:#C48A12;--st-wait-bg:#FBF1DC;
+  --shadow:0 1px 2px rgba(23,30,37,.06),0 8px 24px rgba(23,30,37,.06);
+  --shadow-lift:0 6px 16px rgba(23,30,37,.10),0 20px 48px rgba(23,30,37,.14);
+  --radius:10px;--cell:34px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --ground:#0F151A;--surface:#161E25;--surface-2:#1B242C;--ink:#E7EDF2;--muted:#9DAAB6;
+    --faint:#6B7883;--line:#28333C;--line-strong:#37454F;--steel:#4FA8CE;--amber:#F0A340;
+    --brand:#28C4EC;--weekend:#131B21;--today:#2A2416;
+    --st-plan:#93A2B0;--st-plan-bg:#222D35;--st-prog:#4FA8DE;--st-prog-bg:#13303F;
+    --st-done:#48BD86;--st-done-bg:#123024;--st-delay:#E86B6B;--st-delay-bg:#38201F;
+    --st-wait:#E0AA3E;--st-wait-bg:#332911;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.4);
+    --shadow-lift:0 6px 16px rgba(0,0,0,.5),0 20px 48px rgba(0,0,0,.6);
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);
+  font-family:"PT Sans","Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.45;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1360px;margin:0 auto;padding-block:20px;padding-inline:16px}
+
+header.app{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:14px 18px;margin-bottom:14px;position:relative;overflow:hidden}
+header.app::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
+  background:linear-gradient(var(--brand),var(--steel))}
+.brand{display:flex;align-items:center;gap:12px;padding-left:6px}
+.brand img{height:40px;width:auto;display:block}
+.brand .divider{width:1px;height:36px;background:var(--line-strong)}
+.titles h1{font-family:"Oswald",sans-serif;font-weight:600;font-size:20px;letter-spacing:.3px;
+  margin:0;line-height:1.1;text-transform:uppercase;text-wrap:balance}
+.titles p{margin:2px 0 0;color:var(--muted);font-size:12px}
+.head-spacer{flex:1 1 30px}
+.userbox{display:flex;align-items:center;gap:10px}
+.uwho{text-align:right;line-height:1.2}
+.uwho .n{font-weight:700;font-size:13px}
+.role-pill{display:inline-block;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;
+  padding:2px 8px;border-radius:20px;font-weight:700;margin-top:2px}
+.role-admin{color:#fff;background:var(--steel)}
+.role-editor{color:var(--st-prog);background:var(--st-prog-bg)}
+.role-viewer{color:var(--st-plan);background:var(--st-plan-bg)}
+.iconbtn{appearance:none;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--ink);
+  width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:16px;line-height:1;
+  display:grid;place-items:center;transition:background .15s,border-color .15s,transform .05s}
+.iconbtn:hover{background:var(--steel);color:#fff;border-color:var(--steel)}
+.iconbtn:active{transform:translateY(1px)}
+
+.month-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.month-nav{display:flex;align-items:center;gap:6px}
+.month-nav .mlabel{font-family:"Oswald",sans-serif;font-weight:500;font-size:17px;letter-spacing:.4px;
+  min-width:170px;text-align:center;text-transform:uppercase}
+.today-chip{font-size:11px;color:var(--muted);border:1px solid var(--line);padding:3px 9px;
+  border-radius:20px;background:var(--surface);white-space:nowrap}
+
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;
+  box-shadow:var(--shadow);position:relative}
+.kpi .num{font-family:"Oswald",sans-serif;font-size:26px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums}
+.kpi .lbl{font-size:11px;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.4px}
+.kpi .dot{position:absolute;top:14px;right:14px;width:9px;height:9px;border-radius:50%}
+.kpi .prog-wrap{margin-top:8px;height:6px;border-radius:4px;background:var(--surface-2);overflow:hidden}
+.kpi .prog-bar{height:100%;background:linear-gradient(90deg,var(--st-done),#3fbf86);border-radius:4px;transition:width .4s}
+
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--radius);padding:11px 14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.field{display:flex;flex-direction:column;gap:3px}
+.field label{font-size:10.5px;color:var(--faint);text-transform:uppercase;letter-spacing:.5px;padding-left:2px}
+select,input[type=text],input[type=date],input[type=password]{appearance:none;border:1px solid var(--line-strong);
+  background:var(--surface-2);color:var(--ink);border-radius:8px;padding:7px 10px;font-family:inherit;
+  font-size:13px;min-height:34px}
+select:focus,input:focus,textarea:focus{outline:2px solid var(--steel);outline-offset:1px;border-color:var(--steel)}
+.search-field input{min-width:180px}
+.tb-spacer{flex:1}
+.btn{appearance:none;border:1px solid var(--steel);background:var(--steel);color:#fff;
+  font-family:"Oswald",sans-serif;font-weight:500;letter-spacing:.4px;text-transform:uppercase;font-size:13px;
+  padding:8px 15px;border-radius:8px;cursor:pointer;min-height:34px;display:inline-flex;align-items:center;gap:7px;
+  transition:filter .15s,transform .05s}
+.btn:hover{filter:brightness(1.08)}
+.btn:active{transform:translateY(1px)}
+.btn.ghost{background:var(--surface-2);color:var(--ink);border-color:var(--line-strong)}
+.btn.ghost:hover{border-color:var(--steel);color:var(--steel)}
+.btn.danger{background:var(--st-delay);border-color:var(--st-delay)}
+.btn .plus{font-size:17px;line-height:1;margin-top:-1px}
+
+.board{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.scroll{overflow-x:auto}
+table.plan{border-collapse:collapse;width:max-content;min-width:100%;font-size:13px}
+table.plan thead th{position:sticky;top:0;z-index:3;background:var(--surface-2);font-family:"Oswald",sans-serif;
+  font-weight:500;letter-spacing:.3px;text-transform:uppercase;font-size:11px;color:var(--muted);
+  padding:10px 12px;text-align:left;border-bottom:2px solid var(--line-strong);white-space:nowrap}
+.lead-col{position:sticky;left:0;z-index:2;background:var(--surface)}
+thead th.lead-col{z-index:4;background:var(--surface-2)}
+table.plan tbody td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:hover td,tbody tr:hover td.lead-col{background:var(--surface-2)}
+.c-idx{width:38px;color:var(--faint);font-variant-numeric:tabular-nums;text-align:center}
+.c-machine{min-width:150px;font-weight:700}
+.c-machine small{display:block;font-weight:400;color:var(--muted);font-size:11.5px;margin-top:1px}
+.c-work{min-width:150px}
+.c-team{min-width:130px}
+.c-team small{display:block;color:var(--muted);font-size:11.5px}
+.c-parts{min-width:150px;color:var(--muted);font-size:12px}
+.c-date{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.status-pill i{width:7px;height:7px;border-radius:50%}
+.st-plan{color:var(--st-plan);background:var(--st-plan-bg)}.st-plan i{background:var(--st-plan)}
+.st-prog{color:var(--st-prog);background:var(--st-prog-bg)}.st-prog i{background:var(--st-prog)}
+.st-done{color:var(--st-done);background:var(--st-done-bg)}.st-done i{background:var(--st-done)}
+.st-delay{color:var(--st-delay);background:var(--st-delay-bg)}.st-delay i{background:var(--st-delay)}
+.st-wait{color:var(--st-wait);background:var(--st-wait-bg)}.st-wait i{background:var(--st-wait)}
+.row-actions{display:flex;gap:4px;opacity:0;transition:opacity .12s}
+tbody tr:hover .row-actions{opacity:1}
+.mini{border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);width:26px;height:26px;
+  border-radius:6px;cursor:pointer;font-size:13px;display:grid;place-items:center}
+.mini:hover{color:var(--steel);border-color:var(--steel)}
+.mini.del:hover{color:var(--st-delay);border-color:var(--st-delay)}
+.gantt-head{padding:0!important;border-bottom:2px solid var(--line-strong)}
+.gantt-days{display:flex}
+.gday{width:var(--cell);min-width:var(--cell);text-align:center;padding:6px 0 5px;border-left:1px solid var(--line);
+  font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.gday .dow{display:block;font-size:9px;color:var(--faint);text-transform:uppercase}
+.gday.wknd{background:var(--weekend)}
+.gday.today{background:var(--today);color:var(--amber);font-weight:700}
+td.gantt-cell{padding:0!important;position:relative}
+.gtrack{display:flex;position:relative;height:100%;min-height:40px}
+.gcol{width:var(--cell);min-width:var(--cell);border-left:1px solid var(--line)}
+.gcol.wknd{background:var(--weekend)}.gcol.today{background:var(--today)}
+.gbar{position:absolute;top:9px;height:22px;border-radius:6px;display:flex;align-items:center;padding:0 8px;
+  font-size:11px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;cursor:pointer;
+  box-shadow:0 1px 3px rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.25)}
+.gbar:hover{filter:brightness(1.06);box-shadow:var(--shadow-lift)}
+.gbar.b-plan{background:var(--st-plan)}.gbar.b-prog{background:var(--st-prog)}
+.gbar.b-done{background:var(--st-done)}.gbar.b-delay{background:var(--st-delay)}.gbar.b-wait{background:var(--st-wait)}
+.gbar .clip{position:absolute;top:0;bottom:0;left:0;width:4px;background:rgba(255,255,255,.55)}
+.empty{padding:44px 20px;text-align:center;color:var(--muted)}
+.empty h3{font-family:"Oswald",sans-serif;font-weight:500;margin:0 0 6px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;align-items:center;padding:10px 16px;color:var(--muted);font-size:12px}
+.legend .li{display:inline-flex;align-items:center;gap:6px}
+.legend .sw{width:12px;height:12px;border-radius:3px}
+
+.overlay{position:fixed;inset:0;background:rgba(10,16,20,.55);backdrop-filter:blur(2px);display:none;
+  align-items:flex-start;justify-content:center;z-index:50;padding:24px 16px;overflow:auto}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:14px;width:100%;max-width:560px;
+  box-shadow:var(--shadow-lift);margin:auto}
+.modal.wide{max-width:680px}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line)}
+.modal-head h2{font-family:"Oswald",sans-serif;font-weight:600;font-size:18px;margin:0;text-transform:uppercase;letter-spacing:.4px}
+.modal-body{padding:18px 20px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.modal-body .full{grid-column:1/-1}
+.fgroup{display:flex;flex-direction:column;gap:5px}
+.fgroup label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+.fgroup input,.fgroup select,.fgroup textarea{width:100%}
+textarea{border:1px solid var(--line-strong);background:var(--surface-2);color:var(--ink);border-radius:8px;
+  padding:8px 10px;font-family:inherit;font-size:13px;resize:vertical;min-height:56px}
+.modal-foot{display:flex;justify-content:space-between;gap:10px;padding:14px 20px;border-top:1px solid var(--line)}
+.err{color:var(--st-delay);font-size:12px;padding:0 20px 8px;min-height:0}
+.utable{width:100%;border-collapse:collapse;font-size:13px}
+.utable th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--faint);
+  padding:6px 8px;border-bottom:1px solid var(--line)}
+.utable td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.utable select{min-height:30px;padding:4px 8px}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);opacity:0;
+  background:var(--ink);color:var(--ground);padding:10px 18px;border-radius:10px;font-size:13px;
+  box-shadow:var(--shadow-lift);z-index:80;transition:opacity .2s,transform .2s;pointer-events:none;max-width:90vw}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8px 6px}
+
+@media (max-width:920px){.kpis{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:640px){.kpis{grid-template-columns:repeat(2,1fr)}.modal-body{grid-template-columns:1fr}
+  .head-spacer{flex-basis:100%}}
+@media print{.toolbar,.row-actions,.iconbtn,.today-chip,.userbox{display:none!important}
+  header.app,.kpi,.board{box-shadow:none;border-color:#ccc}.scroll{overflow:visible}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="app">
+    <div class="brand">
+      <img src="/logo.png" alt="Квант Майнинг ХХК">
+      <div class="divider"></div>
+    </div>
+    <div class="titles">
+      <h1>Засварын сарын планер</h1>
+      <p>БЕЛАЗ тэрэгний цахилгаан хөдөлгүүрийн засвар үйлчилгээ</p>
+    </div>
+    <div class="head-spacer"></div>
+    <div class="userbox">
+      <div class="uwho">
+        <div class="n" id="uName">—</div>
+        <span class="role-pill" id="uRole"></span>
+      </div>
+      <button class="iconbtn" id="usersBtn" title="Хэрэглэгч удирдах" style="display:none">👥</button>
+      <button class="iconbtn" id="pwBtn" title="Нууц үг солих">🔑</button>
+      <button class="iconbtn" id="logoutBtn" title="Гарах">⎋</button>
+    </div>
+  </header>
+
+  <div class="month-row">
+    <div class="month-nav">
+      <button class="iconbtn" id="prevM" aria-label="Өмнөх сар">‹</button>
+      <span class="mlabel" id="mLabel">—</span>
+      <button class="iconbtn" id="nextM" aria-label="Дараа сар">›</button>
+    </div>
+    <span class="today-chip" id="todayChip">Өнөөдөр —</span>
+  </div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="toolbar">
+    <div class="field search-field">
+      <label for="q">Хайлт</label>
+      <input type="text" id="q" placeholder="Машин, ажил, хүн…">
+    </div>
+    <div class="field">
+      <label for="fStatus">Статус</label>
+      <select id="fStatus">
+        <option value="">Бүгд</option><option value="plan">Төлөвлөсөн</option>
+        <option value="wait">Хүлээгдэж буй</option><option value="prog">Хийгдэж буй</option>
+        <option value="done">Дууссан</option><option value="delay">Хойшилсон</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="fTeam">Хариуцах баг</label>
+      <select id="fTeam"><option value="">Бүгд</option></select>
+    </div>
+    <div class="tb-spacer"></div>
+    <button class="btn ghost" id="printBtn">Хэвлэх / PDF</button>
+    <button class="btn" id="addBtn" style="display:none"><span class="plus">＋</span> Ажил нэмэх</button>
+  </div>
+
+  <div class="board">
+    <div class="scroll">
+      <table class="plan">
+        <thead>
+          <tr>
+            <th class="lead-col c-idx">№</th>
+            <th class="lead-col c-machine" style="left:38px">Машин / Тоног</th>
+            <th>Ажлын төрөл</th><th>Хариуцах баг</th><th>Сэлбэг / Нөөц</th>
+            <th>Хугацаа</th><th>Статус</th><th id="thAct">Үйлдэл</th>
+            <th class="gantt-head" id="ganttHead"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div class="legend">
+      <span class="li"><span class="sw" style="background:var(--st-plan)"></span>Төлөвлөсөн</span>
+      <span class="li"><span class="sw" style="background:var(--st-wait)"></span>Хүлээгдэж буй</span>
+      <span class="li"><span class="sw" style="background:var(--st-prog)"></span>Хийгдэж буй</span>
+      <span class="li"><span class="sw" style="background:var(--st-done)"></span>Дууссан</span>
+      <span class="li"><span class="sw" style="background:var(--st-delay)"></span>Хойшилсон</span>
+    </div>
+  </div>
+
+  <footer class="note">Квант Майнинг ХХК · ХАБЭА / Засвар үйлчилгээний алба</footer>
+</div>
+
+<!-- Ажил нэмэх/засах -->
+<div class="overlay" id="overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <div class="modal-head"><h2 id="mTitle">Ажил нэмэх</h2><button class="iconbtn" id="closeM">✕</button></div>
+    <div class="modal-body">
+      <div class="fgroup full"><label for="fmMachine">Машин / Тоног төхөөрөмж *</label><input type="text" id="fmMachine" placeholder="жиш: БЕЛАЗ-7555"></div>
+      <div class="fgroup full"><label for="fmUnit">Хөдөлгүүр / Зангилаа</label><input type="text" id="fmUnit" placeholder="жиш: Тяговый двигатель ДК-724А"></div>
+      <div class="fgroup full"><label for="fmWork">Ажлын төрөл *</label><input type="text" id="fmWork" placeholder="жиш: Их засвар — ороомог солих"></div>
+      <div class="fgroup"><label for="fmTeam">Хариуцах баг</label><input type="text" id="fmTeam" placeholder="жиш: Цахилгаан баг"></div>
+      <div class="fgroup"><label for="fmLead">Ахлагч / инженер</label><input type="text" id="fmLead" placeholder="жиш: Б.Ганбаатар"></div>
+      <div class="fgroup full"><label for="fmParts">Сэлбэг / Нөөц</label><textarea id="fmParts" placeholder="жиш: Подшипник 6320, изоляцийн лак, зэс ороомог"></textarea></div>
+      <div class="fgroup"><label for="fmStart">Эхлэх огноо *</label><input type="date" id="fmStart"></div>
+      <div class="fgroup"><label for="fmEnd">Дуусах огноо *</label><input type="date" id="fmEnd"></div>
+      <div class="fgroup full"><label for="fmStatus">Статус</label>
+        <select id="fmStatus"><option value="plan">Төлөвлөсөн</option><option value="wait">Хүлээгдэж буй</option>
+        <option value="prog">Хийгдэж буй</option><option value="done">Дууссан</option><option value="delay">Хойшилсон</option></select></div>
+    </div>
+    <div class="err" id="mErr"></div>
+    <div class="modal-foot">
+      <button class="btn ghost danger" id="delFromModal" style="visibility:hidden">Устгах</button>
+      <div style="display:flex;gap:10px;margin-left:auto">
+        <button class="btn ghost" id="cancelM">Болих</button><button class="btn" id="saveM">Хадгалах</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Хэрэглэгч удирдах (админ) -->
+<div class="overlay" id="uOverlay">
+  <div class="modal wide" role="dialog" aria-modal="true">
+    <div class="modal-head"><h2>Хэрэглэгч удирдах</h2><button class="iconbtn" id="closeU">✕</button></div>
+    <div style="padding:16px 20px">
+      <table class="utable"><thead><tr><th>Нэр</th><th>Нэвтрэх нэр</th><th>Эрх</th><th></th></tr></thead>
+        <tbody id="uBody"></tbody></table>
+    </div>
+    <div class="modal-head" style="border-top:1px solid var(--line);border-bottom:0"><h2 style="font-size:14px">Шинэ хэрэглэгч нэмэх</h2></div>
+    <div class="modal-body">
+      <div class="fgroup"><label for="nuName">Нэр</label><input type="text" id="nuName" placeholder="жиш: Б.Батбаяр"></div>
+      <div class="fgroup"><label for="nuUser">Нэвтрэх нэр *</label><input type="text" id="nuUser" placeholder="латин, жиш: batbayar"></div>
+      <div class="fgroup"><label for="nuPass">Нууц үг *</label><input type="text" id="nuPass" placeholder="доод тал нь 6 тэмдэгт"></div>
+      <div class="fgroup"><label for="nuRole">Эрх</label>
+        <select id="nuRole"><option value="viewer">Харагч (зөвхөн харах)</option><option value="editor">Засварлагч</option><option value="admin">Админ</option></select></div>
+    </div>
+    <div class="err" id="uErr"></div>
+    <div class="modal-foot"><span></span><button class="btn" id="addUser" style="margin-left:auto">Хэрэглэгч нэмэх</button></div>
+  </div>
+</div>
+
+<!-- Нууц үг солих -->
+<div class="overlay" id="pwOverlay">
+  <div class="modal" role="dialog" aria-modal="true" style="max-width:420px">
+    <div class="modal-head"><h2>Нууц үг солих</h2><button class="iconbtn" id="closePw">✕</button></div>
+    <div class="modal-body" style="grid-template-columns:1fr">
+      <div class="fgroup"><label for="pwCur">Одоогийн нууц үг</label><input type="password" id="pwCur"></div>
+      <div class="fgroup"><label for="pwNew">Шинэ нууц үг (6+ тэмдэгт)</label><input type="password" id="pwNew"></div>
+    </div>
+    <div class="err" id="pwErr"></div>
+    <div class="modal-foot"><button class="btn ghost" id="cancelPw">Болих</button><button class="btn" id="savePw" style="margin-left:auto">Хадгалах</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var MONTHS=["1-р сар","2-р сар","3-р сар","4-р сар","5-р сар","6-р сар","7-р сар","8-р сар","9-р сар","10-р сар","11-р сар","12-р сар"];
+  var DOW=["Ня","Да","Мя","Лх","Пү","Ба","Бя"];
+  var ROLE_LABEL={admin:"Админ",editor:"Засварлагч",viewer:"Харагч"};
+  var STATUS={
+    plan:{label:"Төлөвлөсөн",cls:"st-plan",bar:"b-plan"},
+    wait:{label:"Хүлээгдэж буй",cls:"st-wait",bar:"b-wait"},
+    prog:{label:"Хийгдэж буй",cls:"st-prog",bar:"b-prog"},
+    done:{label:"Дууссан",cls:"st-done",bar:"b-done"},
+    delay:{label:"Хойшилсон",cls:"st-delay",bar:"b-delay"}
+  };
+  var $=function(s){return document.querySelector(s);};
+  function pad(n){return n<10?"0"+n:""+n;}
+  function iso(y,m,d){return y+"-"+pad(m+1)+"-"+pad(d);}
+  function parseISO(s){var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2]);}
+  function fmtDate(s){var p=s.split("-");return p[2]+"/"+p[1];}
+  function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+
+  var now=new Date();
+  var view={y:now.getFullYear(),m:now.getMonth()};
+  var data=[], me=null, canWrite=false, isAdmin=false;
+  var fStatus="",fTeam="",fQ="";
+
+  // -------- API --------
+  async function api(method,url,body){
+    var opt={method:method,headers:{}};
+    if(body){opt.headers["Content-Type"]="application/json";opt.body=JSON.stringify(body);}
+    var res=await fetch(url,opt);
+    if(res.status===401){location.replace("/login");throw new Error("401");}
+    var j=null; try{j=await res.json();}catch(e){}
+    if(!res.ok) throw new Error((j&&j.error)||"Алдаа гарлаа");
+    return j;
+  }
+  function toast(msg){var t=$("#toast");t.textContent=msg;t.classList.add("show");
+    clearTimeout(toast._t);toast._t=setTimeout(function(){t.classList.remove("show");},2600);}
+
+  // -------- boot --------
+  async function boot(){
+    try{ var r=await api("GET","/api/me"); me=r.user; }
+    catch(e){ return; } // 401 → redirect handled
+    canWrite=(me.role==="admin"||me.role==="editor");
+    isAdmin=(me.role==="admin");
+    $("#uName").textContent=me.name||me.username;
+    var rp=$("#uRole");rp.textContent=ROLE_LABEL[me.role]||me.role;rp.className="role-pill role-"+me.role;
+    if(canWrite){$("#addBtn").style.display="";}
+    if(isAdmin){$("#usersBtn").style.display="";}
+    if(!canWrite){$("#thAct").style.display="none";}
+    await reload();
+  }
+  async function reload(){
+    try{ data=await api("GET","/api/tasks"); }catch(e){ if(e.message!=="401") toast(e.message); return; }
+    refreshTeams(); render();
+  }
+
+  function inView(r){
+    var y=view.y,m=view.m;
+    var mStart=new Date(y,m,1), mEnd=new Date(y,m,daysInMonth(y,m));
+    return parseISO(r.end)>=mStart && parseISO(r.start)<=mEnd;
+  }
+  function matches(r){
+    if(fStatus && r.status!==fStatus) return false;
+    if(fTeam && r.team!==fTeam) return false;
+    if(fQ){var hay=(r.machine+" "+r.unit+" "+r.work+" "+r.team+" "+(r.lead||"")+" "+(r.parts||"")).toLowerCase();
+      if(hay.indexOf(fQ.toLowerCase())<0) return false;}
+    return true;
+  }
+
+  function render(){
+    var y=view.y,m=view.m,D=daysInMonth(y,m);
+    $("#mLabel").textContent=y+" · "+MONTHS[m];
+    $("#todayChip").textContent="Өнөөдөр "+now.getDate()+"/"+(now.getMonth()+1)+"/"+now.getFullYear();
+    var isThisMonth=(y===now.getFullYear()&&m===now.getMonth());
+
+    var gh=$("#ganttHead");gh.innerHTML="";
+    var gdays=document.createElement("div");gdays.className="gantt-days";
+    for(var day=1;day<=D;day++){
+      var dw=new Date(y,m,day).getDay();
+      var el=document.createElement("div");
+      el.className="gday"+((dw===0||dw===6)?" wknd":"")+((isThisMonth&&day===now.getDate())?" today":"");
+      el.innerHTML=day+'<span class="dow">'+DOW[dw]+'</span>';gdays.appendChild(el);
+    }
+    gh.appendChild(gdays);
+
+    var rows=data.filter(function(r){return inView(r)&&matches(r);})
+      .sort(function(a,b){return parseISO(a.start)-parseISO(b.start);});
+    var tbody=$("#tbody");tbody.innerHTML="";
+    if(!rows.length){
+      var tr=document.createElement("tr");
+      tr.innerHTML='<td colspan="9"><div class="empty"><h3>Ажил олдсонгүй</h3><div>Энэ сард төлөвлөсөн ажил алга, эсвэл шүүлт таарахгүй байна.</div></div></td>';
+      tbody.appendChild(tr);
+    }
+    rows.forEach(function(r,i){
+      var st=STATUS[r.status]||STATUS.plan;
+      var actCell = canWrite
+        ? '<td><div class="row-actions"><button class="mini edit" title="Засах">✎</button><button class="mini del" title="Устгах">🗑</button></div></td>'
+        : '';
+      var tr=document.createElement("tr");
+      tr.innerHTML=
+        '<td class="lead-col c-idx">'+(i+1)+'</td>'+
+        '<td class="lead-col c-machine" style="left:38px">'+esc(r.machine)+'<small>'+esc(r.unit||"")+'</small></td>'+
+        '<td class="c-work">'+esc(r.work)+'</td>'+
+        '<td class="c-team">'+esc(r.team||"—")+'<small>'+esc(r.lead||"")+'</small></td>'+
+        '<td class="c-parts">'+esc(r.parts||"—")+'</td>'+
+        '<td class="c-date">'+fmtDate(r.start)+' – '+fmtDate(r.end)+'</td>'+
+        '<td><span class="status-pill '+st.cls+'"><i></i>'+st.label+'</span></td>'+
+        actCell+
+        '<td class="gantt-cell">'+ganttCell(r,y,m,D,isThisMonth)+'</td>';
+      if(canWrite){
+        tr.querySelector(".edit").addEventListener("click",function(){openEdit(r.id);});
+        tr.querySelector(".del").addEventListener("click",function(){removeRow(r.id);});
+      }
+      var bar=tr.querySelector(".gbar");
+      if(bar&&canWrite) bar.addEventListener("click",function(){openEdit(r.id);});
+      tbody.appendChild(tr);
+    });
+    renderKPIs();
+  }
+
+  function ganttCell(r,y,m,D,isThisMonth){
+    var cols="";
+    for(var day=1;day<=D;day++){
+      var dw=new Date(y,m,day).getDay();
+      cols+='<div class="gcol'+((dw===0||dw===6)?" wknd":"")+((isThisMonth&&day===now.getDate())?" today":"")+'"></div>';
+    }
+    var mStart=new Date(y,m,1),mEnd=new Date(y,m,D);
+    var s=parseISO(r.start),e=parseISO(r.end);
+    var clipL=s<mStart,clipR=e>mEnd;
+    var sd=clipL?1:s.getDate(),ed=clipR?D:e.getDate();
+    var left=(sd-1)*34,width=(ed-sd+1)*34-4;
+    var st=STATUS[r.status]||STATUS.plan;
+    var lbl=r.work.length>26?r.work.slice(0,24)+"…":r.work;
+    var bar='<div class="gbar '+st.bar+'" style="left:'+left+'px;width:'+width+'px" title="'+esc(r.machine+" · "+r.work+" ("+fmtDate(r.start)+"–"+fmtDate(r.end)+")")+'">'+
+            (clipL?'<span class="clip"></span>':'')+esc(lbl)+'</div>';
+    return '<div class="gtrack">'+cols+bar+'</div>';
+  }
+
+  function renderKPIs(){
+    var rows=data.filter(inView);
+    var c={plan:0,wait:0,prog:0,done:0,delay:0};
+    rows.forEach(function(r){c[r.status]=(c[r.status]||0)+1;});
+    var total=rows.length,pct=total?Math.round(c.done/total*100):0;
+    $("#kpis").innerHTML=
+      kpi("Нийт ажил",total,"var(--steel)")+kpi("Төлөвлөсөн",c.plan,"var(--st-plan)")+
+      kpi("Хийгдэж буй",c.prog,"var(--st-prog)")+kpi("Дууссан",c.done,"var(--st-done)")+
+      kpi("Хойшилсон",c.delay,"var(--st-delay)")+
+      '<div class="kpi"><div class="num">'+pct+'%</div><div class="lbl">Гүйцэтгэл</div>'+
+      '<div class="prog-wrap"><div class="prog-bar" style="width:'+pct+'%"></div></div></div>';
+  }
+  function kpi(lbl,num,color){return '<div class="kpi"><div class="dot" style="background:'+color+'"></div>'+
+    '<div class="num">'+num+'</div><div class="lbl">'+lbl+'</div></div>';}
+
+  function refreshTeams(){
+    var sel=$("#fTeam"),cur=sel.value;
+    var teams=Array.from(new Set(data.map(function(r){return r.team;}).filter(Boolean))).sort();
+    sel.innerHTML='<option value="">Бүгд</option>'+teams.map(function(t){return '<option value="'+esc(t)+'">'+esc(t)+'</option>';}).join("");
+    sel.value=cur;
+  }
+
+  // -------- task modal --------
+  var editingId=null;
+  function openAdd(){
+    if(!canWrite)return;
+    editingId=null;$("#mTitle").textContent="Ажил нэмэх";
+    ["fmMachine","fmUnit","fmWork","fmTeam","fmLead","fmParts"].forEach(function(id){$("#"+id).value="";});
+    var y=view.y,m=view.m,td=Math.min(now.getDate()||1,daysInMonth(y,m));
+    $("#fmStart").value=iso(y,m,td);$("#fmEnd").value=iso(y,m,Math.min(td+2,daysInMonth(y,m)));
+    $("#fmStatus").value="plan";$("#mErr").textContent="";$("#delFromModal").style.visibility="hidden";showM();
+  }
+  function openEdit(rid){
+    if(!canWrite)return;
+    var r=data.find(function(x){return x.id===rid;});if(!r)return;
+    editingId=rid;$("#mTitle").textContent="Ажил засах";
+    $("#fmMachine").value=r.machine||"";$("#fmUnit").value=r.unit||"";$("#fmWork").value=r.work||"";
+    $("#fmTeam").value=r.team||"";$("#fmLead").value=r.lead||"";$("#fmParts").value=r.parts||"";
+    $("#fmStart").value=r.start;$("#fmEnd").value=r.end;$("#fmStatus").value=r.status;
+    $("#mErr").textContent="";$("#delFromModal").style.visibility="visible";showM();
+  }
+  function showM(){$("#overlay").classList.add("open");setTimeout(function(){$("#fmMachine").focus();},30);}
+  function hideM(){$("#overlay").classList.remove("open");}
+  async function saveModal(){
+    var rec={machine:$("#fmMachine").value.trim(),unit:$("#fmUnit").value.trim(),work:$("#fmWork").value.trim(),
+      team:$("#fmTeam").value.trim(),lead:$("#fmLead").value.trim(),parts:$("#fmParts").value.trim(),
+      start:$("#fmStart").value,end:$("#fmEnd").value,status:$("#fmStatus").value};
+    var err=$("#mErr");err.textContent="";
+    if(!rec.machine){err.textContent="Машины нэр оруулна уу.";return;}
+    if(!rec.work){err.textContent="Ажлын төрлийг оруулна уу.";return;}
+    if(!rec.start||!rec.end){err.textContent="Огноог сонгоно уу.";return;}
+    if(rec.end<rec.start){err.textContent="Дуусах огноо эхлэхээс өмнө байж болохгүй.";return;}
+    try{
+      if(editingId) await api("PUT","/api/tasks/"+editingId,rec);
+      else await api("POST","/api/tasks",rec);
+      hideM();await reload();toast(editingId?"Ажил шинэчлэгдлээ":"Ажил нэмэгдлээ");
+    }catch(ex){ if(ex.message!=="401") err.textContent=ex.message; }
+  }
+  async function removeRow(rid){
+    var r=data.find(function(x){return x.id===rid;});if(!r)return;
+    if(!confirm('"'+r.machine+' — '+r.work+'" ажлыг устгах уу?'))return;
+    try{ await api("DELETE","/api/tasks/"+rid);await reload();toast("Ажил устлаа"); }
+    catch(ex){ if(ex.message!=="401") toast(ex.message); }
+  }
+
+  // -------- users modal (admin) --------
+  async function openUsers(){
+    if(!isAdmin)return;
+    $("#uErr").textContent="";$("#uOverlay").classList.add("open");
+    await loadUsers();
+  }
+  async function loadUsers(){
+    var list; try{ list=await api("GET","/api/users"); }catch(e){ return; }
+    var tb=$("#uBody");tb.innerHTML="";
+    list.forEach(function(u){
+      var tr=document.createElement("tr");
+      var sel='<select data-id="'+u.id+'" class="roleSel">'+
+        ['viewer','editor','admin'].map(function(rr){return '<option value="'+rr+'"'+(u.role===rr?' selected':'')+'>'+ROLE_LABEL[rr]+'</option>';}).join("")+'</select>';
+      tr.innerHTML='<td>'+esc(u.name||"—")+(u.username===me.username?' <span class="role-pill role-viewer">та</span>':'')+'</td>'+
+        '<td>'+esc(u.username)+'</td><td>'+sel+'</td>'+
+        '<td style="text-align:right"><button class="mini del" data-del="'+u.id+'" title="Устгах">🗑</button></td>';
+      tb.appendChild(tr);
+    });
+    tb.querySelectorAll(".roleSel").forEach(function(s){
+      s.addEventListener("change",async function(){
+        try{ await api("PUT","/api/users/"+this.getAttribute("data-id"),{role:this.value});toast("Эрх шинэчлэгдлээ"); }
+        catch(ex){ toast(ex.message);loadUsers(); }
+      });
+    });
+    tb.querySelectorAll("[data-del]").forEach(function(b){
+      b.addEventListener("click",async function(){
+        if(!confirm("Энэ хэрэглэгчийг устгах уу?"))return;
+        try{ await api("DELETE","/api/users/"+this.getAttribute("data-del"));toast("Хэрэглэгч устлаа");loadUsers(); }
+        catch(ex){ toast(ex.message); }
+      });
+    });
+  }
+  async function addUser(){
+    var body={name:$("#nuName").value.trim(),username:$("#nuUser").value.trim(),
+      password:$("#nuPass").value,role:$("#nuRole").value};
+    var err=$("#uErr");err.textContent="";
+    if(!body.username){err.textContent="Нэвтрэх нэр оруулна уу.";return;}
+    if(body.password.length<6){err.textContent="Нууц үг доод тал нь 6 тэмдэгт.";return;}
+    try{ await api("POST","/api/users",body);
+      $("#nuName").value="";$("#nuUser").value="";$("#nuPass").value="";$("#nuRole").value="viewer";
+      toast("Хэрэглэгч нэмэгдлээ");loadUsers(); }
+    catch(ex){ err.textContent=ex.message; }
+  }
+
+  // -------- password modal --------
+  async function savePw(){
+    var err=$("#pwErr");err.textContent="";
+    var cur=$("#pwCur").value,nw=$("#pwNew").value;
+    if(nw.length<6){err.textContent="Шинэ нууц үг доод тал нь 6 тэмдэгт.";return;}
+    try{ await api("POST","/api/password",{current:cur,next:nw});
+      $("#pwCur").value="";$("#pwNew").value="";$("#pwOverlay").classList.remove("open");toast("Нууц үг солигдлоо"); }
+    catch(ex){ err.textContent=ex.message; }
+  }
+
+  // -------- events --------
+  $("#prevM").addEventListener("click",function(){view.m--;if(view.m<0){view.m=11;view.y--;}render();});
+  $("#nextM").addEventListener("click",function(){view.m++;if(view.m>11){view.m=0;view.y++;}render();});
+  $("#addBtn").addEventListener("click",openAdd);
+  $("#printBtn").addEventListener("click",function(){window.print();});
+  $("#closeM").addEventListener("click",hideM);$("#cancelM").addEventListener("click",hideM);
+  $("#saveM").addEventListener("click",saveModal);
+  $("#delFromModal").addEventListener("click",function(){if(editingId){var rid=editingId;hideM();removeRow(rid);}});
+  $("#overlay").addEventListener("click",function(e){if(e.target===this)hideM();});
+  $("#usersBtn").addEventListener("click",openUsers);
+  $("#closeU").addEventListener("click",function(){$("#uOverlay").classList.remove("open");});
+  $("#uOverlay").addEventListener("click",function(e){if(e.target===this)this.classList.remove("open");});
+  $("#addUser").addEventListener("click",addUser);
+  $("#pwBtn").addEventListener("click",function(){$("#pwErr").textContent="";$("#pwOverlay").classList.add("open");});
+  $("#closePw").addEventListener("click",function(){$("#pwOverlay").classList.remove("open");});
+  $("#cancelPw").addEventListener("click",function(){$("#pwOverlay").classList.remove("open");});
+  $("#pwOverlay").addEventListener("click",function(e){if(e.target===this)this.classList.remove("open");});
+  $("#savePw").addEventListener("click",savePw);
+  $("#logoutBtn").addEventListener("click",async function(){try{await api("POST","/api/logout");}catch(e){}location.replace("/login");});
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"){hideM();$("#uOverlay").classList.remove("open");$("#pwOverlay").classList.remove("open");}});
+  $("#q").addEventListener("input",function(){fQ=this.value;render();});
+  $("#fStatus").addEventListener("change",function(){fStatus=this.value;render();});
+  $("#fTeam").addEventListener("change",function(){fTeam=this.value;render();});
+
+  boot();
+})();
+</script>
+</body>
+</html>
