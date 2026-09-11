@@ -183,6 +183,40 @@ textarea{border:1px solid var(--line-strong);background:var(--surface-2);color:v
   background:var(--ink);color:var(--ground);padding:10px 18px;border-radius:10px;font-size:13px;
   box-shadow:var(--shadow-lift);z-index:80;transition:opacity .2s,transform .2s;pointer-events:none;max-width:90vw}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.viewtabs{display:flex;gap:8px;margin-bottom:14px}
+.vtab{appearance:none;border:1px solid var(--line-strong);background:var(--surface);color:var(--muted);
+  font-family:"Oswald",sans-serif;font-weight:500;letter-spacing:.3px;text-transform:uppercase;font-size:13px;
+  padding:9px 18px;border-radius:9px;cursor:pointer;transition:all .15s}
+.vtab:hover{color:var(--steel);border-color:var(--steel)}
+.vtab.active{background:var(--steel);color:#fff;border-color:var(--steel)}
+.feed-composer{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:16px 18px;margin-bottom:16px;max-width:640px}
+.feed-composer h3{font-family:"Oswald",sans-serif;font-weight:500;font-size:15px;margin:0 0 12px;text-transform:uppercase;letter-spacing:.3px}
+.fc-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.filebtn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--steel);background:var(--surface-2);
+  color:var(--steel);font-weight:700;font-size:13px;padding:8px 14px;border-radius:8px;cursor:pointer}
+.filebtn:hover{background:var(--steel);color:#fff}
+.fc-name{color:var(--muted);font-size:12.5px}
+.fc-preview{display:block;margin-top:12px;max-width:100%;max-height:280px;border-radius:10px;border:1px solid var(--line)}
+.feed-composer textarea{width:100%;margin-top:12px;border:1px solid var(--line-strong);background:var(--surface-2);
+  color:var(--ink);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:14px;resize:vertical;min-height:60px}
+.fc-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:12px}
+.fc-actions .err{margin-right:auto;color:var(--st-delay);font-size:12.5px}
+.feed-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;align-items:start}
+.post{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+.post img{width:100%;display:block;background:var(--surface-2);cursor:zoom-in}
+.post-body{padding:12px 14px}
+.post-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.post-author{font-weight:700;font-size:13px}
+.post-date{color:var(--faint);font-size:11.5px;white-space:nowrap}
+.post-caption{font-size:13.5px;color:var(--ink);white-space:pre-wrap;word-break:break-word}
+.post-del{align-self:flex-start;margin-top:2px;border:1px solid var(--line-strong);background:var(--surface);
+  color:var(--muted);width:26px;height:26px;border-radius:6px;cursor:pointer;font-size:13px}
+.post-del:hover{color:var(--st-delay);border-color:var(--st-delay)}
+.feed-empty{grid-column:1/-1;padding:40px 20px;text-align:center;color:var(--muted)}
+.lightbox{position:fixed;inset:0;background:rgba(10,16,20,.85);display:none;align-items:center;justify-content:center;z-index:90;padding:20px;cursor:zoom-out}
+.lightbox.open{display:flex}
+.lightbox img{max-width:100%;max-height:100%;border-radius:8px}
 footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8px 6px}
 
 @media (max-width:920px){.kpis{grid-template-columns:repeat(3,1fr)}}
@@ -216,6 +250,12 @@ footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8
     </div>
   </header>
 
+  <div class="viewtabs">
+    <button class="vtab active" id="tabPlanner">📅 Планер</button>
+    <button class="vtab" id="tabFeed">📰 Мэдээ</button>
+  </div>
+
+  <div id="viewPlanner">
   <div class="month-row">
     <div class="month-nav">
       <button class="iconbtn" id="prevM" aria-label="Өмнөх сар">‹</button>
@@ -271,6 +311,25 @@ footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8
       <span class="li"><span class="sw" style="background:var(--st-done)"></span>Дууссан</span>
       <span class="li"><span class="sw" style="background:var(--st-delay)"></span>Хойшилсон</span>
     </div>
+  </div>
+  </div><!-- /viewPlanner -->
+
+  <div id="viewFeed" hidden>
+    <div class="feed-composer">
+      <h3>📷 Ажлын зураг нийтлэх</h3>
+      <div class="fc-row">
+        <label class="filebtn" for="postImg">Зураг сонгох</label>
+        <input type="file" id="postImg" accept="image/*" hidden>
+        <span class="fc-name" id="postFileName">Зураг сонгоогүй байна</span>
+      </div>
+      <img id="postPreview" class="fc-preview" alt="" hidden>
+      <textarea id="postCaption" placeholder="Тайлбар… (жиш: БЕЛАЗ-7555 хөдөлгүүрийн ороомог соливоо)"></textarea>
+      <div class="fc-actions">
+        <span class="err" id="postErr"></span>
+        <button class="btn" id="postBtn">Нийтлэх</button>
+      </div>
+    </div>
+    <div class="feed-list" id="feedList"></div>
   </div>
 
   <footer class="note">Квант Майнинг ХХК · ХАБЭА / Засвар үйлчилгээний алба</footer>
@@ -338,6 +397,7 @@ footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="lightbox" id="lightbox"><img alt=""></div>
 
 <script>
 (function(){
@@ -620,6 +680,100 @@ footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8
   $("#q").addEventListener("input",function(){fQ=this.value;render();});
   $("#fStatus").addEventListener("change",function(){fStatus=this.value;render();});
   $("#fTeam").addEventListener("change",function(){fTeam=this.value;render();});
+
+  // -------- Мэдээ / Newsfeed --------
+  var feedLoaded=false, pendingImage=null;
+  function showView(which){
+    var planner=(which==="planner");
+    $("#viewPlanner").hidden=!planner;
+    $("#viewFeed").hidden=planner;
+    $("#tabPlanner").classList.toggle("active",planner);
+    $("#tabFeed").classList.toggle("active",!planner);
+    if(!planner && !feedLoaded) loadFeed();
+  }
+  $("#tabPlanner").addEventListener("click",function(){showView("planner");});
+  $("#tabFeed").addEventListener("click",function(){showView("feed");});
+
+  $("#postImg").addEventListener("change",function(){
+    var f=this.files&&this.files[0]; if(!f) return;
+    $("#postFileName").textContent=f.name;
+    resizeImage(f,function(dataUrl){
+      pendingImage=dataUrl;
+      var p=$("#postPreview"); p.src=dataUrl; p.hidden=false;
+    });
+  });
+  function resizeImage(file,cb){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        var max=1000, w=img.width, h=img.height;
+        if(w>h && w>max){ h=Math.round(h*max/w); w=max; }
+        else if(h>=w && h>max){ w=Math.round(w*max/h); h=max; }
+        var c=document.createElement("canvas"); c.width=w; c.height=h;
+        c.getContext("2d").drawImage(img,0,0,w,h);
+        cb(c.toDataURL("image/jpeg",0.6));
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  async function submitPost(){
+    var err=$("#postErr"); err.textContent="";
+    if(!pendingImage){ err.textContent="Зураг сонгоно уу."; return; }
+    var caption=$("#postCaption").value.trim();
+    var btn=$("#postBtn"); btn.disabled=true; btn.textContent="Нийтэлж байна…";
+    try{
+      await api("POST","/api/posts",{image:pendingImage,caption:caption});
+      pendingImage=null; $("#postCaption").value=""; $("#postImg").value="";
+      $("#postPreview").hidden=true; $("#postFileName").textContent="Зураг сонгоогүй байна";
+      toast("Мэдээ нийтлэгдлээ"); await loadFeed();
+    }catch(ex){ if(ex.message!=="401") err.textContent=ex.message; }
+    finally{ btn.disabled=false; btn.textContent="Нийтлэх"; }
+  }
+  $("#postBtn").addEventListener("click",submitPost);
+
+  async function loadFeed(){
+    var list=$("#feedList");
+    if(!feedLoaded) list.innerHTML='<div class="feed-empty">Ачаалж байна…</div>';
+    var posts;
+    try{ posts=await api("GET","/api/posts"); }catch(e){ if(e.message!=="401") toast(e.message); return; }
+    feedLoaded=true;
+    if(!posts.length){ list.innerHTML='<div class="feed-empty">Одоогоор нийтэлсэн зураг алга. Хамгийн түрүүнд ажлынхаа зургийг нийтэлээрэй.</div>'; return; }
+    list.innerHTML="";
+    posts.forEach(function(p){
+      var canDel=isAdmin || (me && (p.author===me.name || p.author===me.username));
+      var card=document.createElement("div"); card.className="post";
+      card.innerHTML=
+        '<img src="'+p.image+'" alt="Ажлын зураг">'+
+        '<div class="post-body"><div class="post-meta">'+
+        '<span class="post-author">'+esc(p.author||"—")+'</span>'+
+        '<span class="post-date">'+relTime(p.createdAt)+'</span></div>'+
+        (p.caption?'<div class="post-caption">'+esc(p.caption)+'</div>':'')+
+        (canDel?'<button class="post-del" title="Устгах">🗑</button>':'')+
+        '</div>';
+      card.querySelector("img").addEventListener("click",function(){openLightbox(p.image);});
+      var del=card.querySelector(".post-del");
+      if(del) del.addEventListener("click",function(){deletePost(p.id);});
+      list.appendChild(card);
+    });
+  }
+  async function deletePost(id){
+    if(!confirm("Энэ нийтлэлийг устгах уу?")) return;
+    try{ await api("DELETE","/api/posts/"+id); toast("Устлаа"); await loadFeed(); }
+    catch(ex){ if(ex.message!=="401") toast(ex.message); }
+  }
+  function relTime(iso){
+    var d=new Date(iso), diff=(Date.now()-d.getTime())/1000;
+    if(diff<60) return "саяхан";
+    if(diff<3600) return Math.floor(diff/60)+" мин өмнө";
+    if(diff<86400) return Math.floor(diff/3600)+" цагийн өмнө";
+    if(diff<604800) return Math.floor(diff/86400)+" өдрийн өмнө";
+    return d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate();
+  }
+  function openLightbox(src){ var lb=$("#lightbox"); lb.querySelector("img").src=src; lb.classList.add("open"); }
+  $("#lightbox").addEventListener("click",function(){ this.classList.remove("open"); });
+  document.addEventListener("keydown",function(e){ if(e.key==="Escape") $("#lightbox").classList.remove("open"); });
 
   boot();
 })();
