@@ -11,14 +11,14 @@
 <style>
 :root{
   --ground:#EEF1F4;--surface:#FFFFFF;--ink:#171E25;--muted:#5E6B77;--faint:#8593A0;
-  --line:#DBE1E7;--line-strong:#C4CDD6;--steel:#1F5673;--brand:#1BB8E0;--amber:#E8891A;
+  --line:#DBE1E7;--line-strong:#C4CDD6;--steel:#0A6E8C;--brand:#00BAF0;--brand-d1:#0C5F79;--brand-d2:#0A4658;--amber:#E8891A;
   --err:#D64545;--err-bg:#FBE7E7;
   --shadow:0 10px 40px rgba(23,30,37,.12);
 }
 @media (prefers-color-scheme:dark){
   :root{
     --ground:#0F151A;--surface:#161E25;--ink:#E7EDF2;--muted:#9DAAB6;--faint:#6B7883;
-    --line:#28333C;--line-strong:#37454F;--steel:#4FA8CE;--brand:#28C4EC;--amber:#F0A340;
+    --line:#28333C;--line-strong:#37454F;--steel:#4FA8CE;--brand:#37CFF5;--brand-d1:#0B5872;--brand-d2:#0A4356;--amber:#F0A340;
     --err:#E86B6B;--err-bg:#38201F;--shadow:0 10px 40px rgba(0,0,0,.55);
   }
 }
@@ -30,11 +30,12 @@ body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px 16px
   color:var(--ink);font-family:"PT Sans","Segoe UI",system-ui,sans-serif;font-size:14px}
 .card{width:100%;max-width:390px;background:var(--surface);border:1px solid var(--line);
   border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
-.top{padding:26px 30px 6px;text-align:center}
-.top img{height:52px;width:auto}
+.top{padding:28px 30px 22px;text-align:center;
+  background:linear-gradient(120deg,var(--brand-d1),var(--brand-d2));color:#fff}
+.top img{height:44px;width:auto;background:#fff;padding:7px 12px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,.18)}
 .top h1{font-family:"Oswald",sans-serif;font-weight:600;font-size:18px;letter-spacing:.4px;
-  text-transform:uppercase;margin:16px 0 2px}
-.top p{color:var(--muted);font-size:12.5px;margin:0}
+  text-transform:uppercase;margin:16px 0 2px;color:#fff}
+.top p{color:rgba(255,255,255,.82);font-size:12.5px;margin:0}
 form{padding:20px 30px 26px;display:flex;flex-direction:column;gap:14px}
 .fld{display:flex;flex-direction:column;gap:5px}
 .fld label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-weight:700}

@@ -11,8 +11,8 @@
 <style>
 :root{
   --ground:#EEF1F4;--surface:#FFFFFF;--surface-2:#F6F8FA;--ink:#171E25;--muted:#5E6B77;
-  --faint:#8593A0;--line:#DBE1E7;--line-strong:#C4CDD6;--steel:#1F5673;--amber:#E8891A;
-  --brand:#1BB8E0;--weekend:#EAEEF2;--today:#FFF4E3;
+  --faint:#8593A0;--line:#DBE1E7;--line-strong:#C4CDD6;--steel:#0A6E8C;--amber:#E8891A;
+  --brand:#00BAF0;--brand-d1:#0C5F79;--brand-d2:#0A4658;--weekend:#EAEEF2;--today:#FFF4E3;
   --st-plan:#6B7B8C;--st-plan-bg:#EBEEF2;--st-prog:#1F87C7;--st-prog-bg:#E3F1FB;
   --st-done:#2E9E6B;--st-done-bg:#E4F5EC;--st-delay:#D64545;--st-delay-bg:#FBE7E7;
   --st-wait:#C48A12;--st-wait-bg:#FBF1DC;
@@ -25,6 +25,7 @@
     --ground:#0F151A;--surface:#161E25;--surface-2:#1B242C;--ink:#E7EDF2;--muted:#9DAAB6;
     --faint:#6B7883;--line:#28333C;--line-strong:#37454F;--steel:#4FA8CE;--amber:#F0A340;
     --brand:#28C4EC;--weekend:#131B21;--today:#2A2416;
+    --brand-d1:#0B5872;--brand-d2:#0A4356;
     --st-plan:#93A2B0;--st-plan-bg:#222D35;--st-prog:#4FA8DE;--st-prog-bg:#13303F;
     --st-done:#48BD86;--st-done-bg:#123024;--st-delay:#E86B6B;--st-delay-bg:#38201F;
     --st-wait:#E0AA3E;--st-wait-bg:#332911;
@@ -38,17 +39,21 @@ body{margin:0;background:var(--ground);color:var(--ink);
   -webkit-font-smoothing:antialiased}
 .wrap{max-width:1360px;margin:0 auto;padding-block:20px;padding-inline:16px}
 
-header.app{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:var(--surface);
-  border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+header.app{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  background:linear-gradient(120deg,var(--brand-d1) 0%,var(--brand-d2) 100%);color:#fff;
+  border:1px solid transparent;border-radius:var(--radius);box-shadow:var(--shadow);
   padding:14px 18px;margin-bottom:14px;position:relative;overflow:hidden}
-header.app::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;
-  background:linear-gradient(var(--brand),var(--steel))}
+header.app::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--brand)}
 .brand{display:flex;align-items:center;gap:12px;padding-left:6px}
-.brand img{height:40px;width:auto;display:block}
-.brand .divider{width:1px;height:36px;background:var(--line-strong)}
+.brand img{height:34px;width:auto;display:block;background:#fff;padding:5px 9px;border-radius:8px;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.brand .divider{width:1px;height:36px;background:rgba(255,255,255,.28)}
 .titles h1{font-family:"Oswald",sans-serif;font-weight:600;font-size:20px;letter-spacing:.3px;
-  margin:0;line-height:1.1;text-transform:uppercase;text-wrap:balance}
-.titles p{margin:2px 0 0;color:var(--muted);font-size:12px}
+  margin:0;line-height:1.1;text-transform:uppercase;text-wrap:balance;color:#fff}
+.titles p{margin:2px 0 0;color:rgba(255,255,255,.82);font-size:12px}
+header.app .uwho .n{color:#fff}
+header.app .iconbtn{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.3)}
+header.app .iconbtn:hover{background:#fff;color:var(--brand-d1);border-color:#fff}
+header.app .role-admin{background:var(--brand);color:#08303d}
 .head-spacer{flex:1 1 30px}
 .userbox{display:flex;align-items:center;gap:10px}
 .uwho{text-align:right;line-height:1.2}
@@ -188,7 +193,7 @@ textarea{border:1px solid var(--line-strong);background:var(--surface-2);color:v
   font-family:"Oswald",sans-serif;font-weight:500;letter-spacing:.3px;text-transform:uppercase;font-size:13px;
   padding:9px 18px;border-radius:9px;cursor:pointer;transition:all .15s}
 .vtab:hover{color:var(--steel);border-color:var(--steel)}
-.vtab.active{background:var(--steel);color:#fff;border-color:var(--steel)}
+.vtab.active{background:linear-gradient(120deg,var(--brand-d1),var(--brand-d2));color:#fff;border-color:transparent}
 .feed-composer{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
   box-shadow:var(--shadow);padding:16px 18px;margin-bottom:16px;max-width:640px}
 .feed-composer h3{font-family:"Oswald",sans-serif;font-weight:500;font-size:15px;margin:0 0 12px;text-transform:uppercase;letter-spacing:.3px}
