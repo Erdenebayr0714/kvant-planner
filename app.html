@@ -197,14 +197,26 @@ textarea{border:1px solid var(--line-strong);background:var(--surface-2);color:v
   color:var(--steel);font-weight:700;font-size:13px;padding:8px 14px;border-radius:8px;cursor:pointer}
 .filebtn:hover{background:var(--steel);color:#fff}
 .fc-name{color:var(--muted);font-size:12.5px}
-.fc-preview{display:block;margin-top:12px;max-width:100%;max-height:280px;border-radius:10px;border:1px solid var(--line)}
+.fc-previews{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.fc-previews .thumb{position:relative;width:90px;height:90px;border-radius:8px;overflow:hidden;border:1px solid var(--line)}
+.fc-previews .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.fc-previews .thumb button{position:absolute;top:2px;right:2px;width:20px;height:20px;border:0;border-radius:50%;
+  background:rgba(10,16,20,.65);color:#fff;cursor:pointer;font-size:12px;line-height:1;display:grid;place-items:center}
 .feed-composer textarea{width:100%;margin-top:12px;border:1px solid var(--line-strong);background:var(--surface-2);
   color:var(--ink);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:14px;resize:vertical;min-height:60px}
 .fc-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin-top:12px}
 .fc-actions .err{margin-right:auto;color:var(--st-delay);font-size:12.5px}
 .feed-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;align-items:start}
 .post{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
-.post img{width:100%;display:block;background:var(--surface-2);cursor:zoom-in}
+.post-gallery{display:grid;gap:2px;background:var(--line)}
+.post-gallery.g1{grid-template-columns:1fr}
+.post-gallery.g2{grid-template-columns:1fr 1fr}
+.post-gallery.g3,.post-gallery.g4,.post-gallery.gmore{grid-template-columns:1fr 1fr}
+.post-gallery img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;aspect-ratio:1/1;background:var(--surface-2)}
+.post-gallery.g1 img{aspect-ratio:auto;max-height:380px}
+.post-gallery .more{position:relative}
+.post-gallery .more::after{content:attr(data-more);position:absolute;inset:0;background:rgba(10,16,20,.55);color:#fff;
+  display:grid;place-items:center;font-size:22px;font-weight:700;font-family:"Oswald",sans-serif}
 .post-body{padding:12px 14px}
 .post-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
 .post-author{font-weight:700;font-size:13px}
@@ -217,6 +229,10 @@ textarea{border:1px solid var(--line-strong);background:var(--surface-2);color:v
 .lightbox{position:fixed;inset:0;background:rgba(10,16,20,.85);display:none;align-items:center;justify-content:center;z-index:90;padding:20px;cursor:zoom-out}
 .lightbox.open{display:flex}
 .lightbox img{max-width:100%;max-height:100%;border-radius:8px}
+.lb-nav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:0;
+  background:rgba(255,255,255,.15);color:#fff;font-size:30px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.lb-nav:hover{background:rgba(255,255,255,.3)}
+.lb-prev{left:16px}.lb-next{right:16px}
 footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8px 6px}
 
 @media (max-width:920px){.kpis{grid-template-columns:repeat(3,1fr)}}
@@ -236,7 +252,7 @@ footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8
     </div>
     <div class="titles">
       <h1>Засварын сарын планер</h1>
-      <p>БЕЛАЗ тэрэгний цахилгаан хөдөлгүүрийн засвар үйлчилгээ</p>
+      <p>Цахилгаан хөдөлгүүр, генераторын засвар үйлчилгээ</p>
     </div>
     <div class="head-spacer"></div>
     <div class="userbox">
@@ -318,12 +334,12 @@ footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8
     <div class="feed-composer">
       <h3>📷 Ажлын зураг нийтлэх</h3>
       <div class="fc-row">
-        <label class="filebtn" for="postImg">Зураг сонгох</label>
-        <input type="file" id="postImg" accept="image/*" hidden>
-        <span class="fc-name" id="postFileName">Зураг сонгоогүй байна</span>
+        <label class="filebtn" for="postImg">📷 Зургууд сонгох</label>
+        <input type="file" id="postImg" accept="image/*" multiple hidden>
+        <span class="fc-name" id="postFileName">Зураг сонгоогүй байна (нэг дор олон сонгож болно)</span>
       </div>
-      <img id="postPreview" class="fc-preview" alt="" hidden>
-      <textarea id="postCaption" placeholder="Тайлбар… (жиш: БЕЛАЗ-7555 хөдөлгүүрийн ороомог соливоо)"></textarea>
+      <div id="postPreview" class="fc-previews" hidden></div>
+      <textarea id="postCaption" placeholder="Тайлбар… (жиш: Тяговый двигатель ДК-724А хөдөлгүүрийн ороомог соливоо)"></textarea>
       <div class="fc-actions">
         <span class="err" id="postErr"></span>
         <button class="btn" id="postBtn">Нийтлэх</button>
@@ -340,7 +356,7 @@ footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
     <div class="modal-head"><h2 id="mTitle">Ажил нэмэх</h2><button class="iconbtn" id="closeM">✕</button></div>
     <div class="modal-body">
-      <div class="fgroup full"><label for="fmMachine">Машин / Тоног төхөөрөмж *</label><input type="text" id="fmMachine" placeholder="жиш: БЕЛАЗ-7555"></div>
+      <div class="fgroup full"><label for="fmMachine">Машин / Тоног төхөөрөмж *</label><input type="text" id="fmMachine" placeholder="жиш: Тяговый двигатель ДК-724А"></div>
       <div class="fgroup full"><label for="fmUnit">Хөдөлгүүр / Зангилаа</label><input type="text" id="fmUnit" placeholder="жиш: Тяговый двигатель ДК-724А"></div>
       <div class="fgroup full"><label for="fmWork">Ажлын төрөл *</label><input type="text" id="fmWork" placeholder="жиш: Их засвар — ороомог солих"></div>
       <div class="fgroup"><label for="fmTeam">Хариуцах баг</label><input type="text" id="fmTeam" placeholder="жиш: Цахилгаан баг"></div>
@@ -397,7 +413,11 @@ footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="lightbox" id="lightbox"><img alt=""></div>
+<div class="lightbox" id="lightbox">
+  <button class="lb-nav lb-prev" id="lbPrev" aria-label="Өмнөх">‹</button>
+  <img alt="" id="lbImg">
+  <button class="lb-nav lb-next" id="lbNext" aria-label="Дараах">›</button>
+</div>
 
 <script>
 (function(){
@@ -682,7 +702,7 @@ footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8
   $("#fTeam").addEventListener("change",function(){fTeam=this.value;render();});
 
   // -------- Мэдээ / Newsfeed --------
-  var feedLoaded=false, pendingImage=null;
+  var feedLoaded=false, pendingImages=[];
   function showView(which){
     var planner=(which==="planner");
     $("#viewPlanner").hidden=!planner;
@@ -695,13 +715,29 @@ footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8
   $("#tabFeed").addEventListener("click",function(){showView("feed");});
 
   $("#postImg").addEventListener("change",function(){
-    var f=this.files&&this.files[0]; if(!f) return;
-    $("#postFileName").textContent=f.name;
-    resizeImage(f,function(dataUrl){
-      pendingImage=dataUrl;
-      var p=$("#postPreview"); p.src=dataUrl; p.hidden=false;
+    var files=this.files ? Array.prototype.slice.call(this.files) : [];
+    if(!files.length) return;
+    files.forEach(function(f){
+      if(pendingImages.length>=12){ return; }
+      resizeImage(f,function(dataUrl){
+        if(pendingImages.length>=12){ toast("Хамгийн ихдээ 12 зураг"); return; }
+        pendingImages.push(dataUrl); renderPreviews();
+      });
     });
+    this.value="";
   });
+  function renderPreviews(){
+    var box=$("#postPreview");
+    if(!pendingImages.length){ box.hidden=true; box.innerHTML=""; $("#postFileName").textContent="Зураг сонгоогүй байна (нэг дор олон сонгож болно)"; return; }
+    box.hidden=false; box.innerHTML="";
+    pendingImages.forEach(function(src,i){
+      var t=document.createElement("div"); t.className="thumb";
+      t.innerHTML='<img src="'+src+'" alt=""><button title="Хасах">✕</button>';
+      t.querySelector("button").addEventListener("click",function(){ pendingImages.splice(i,1); renderPreviews(); });
+      box.appendChild(t);
+    });
+    $("#postFileName").textContent=pendingImages.length+" зураг сонгогдсон";
+  }
   function resizeImage(file,cb){
     var reader=new FileReader();
     reader.onload=function(e){
@@ -720,13 +756,13 @@ footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8
   }
   async function submitPost(){
     var err=$("#postErr"); err.textContent="";
-    if(!pendingImage){ err.textContent="Зураг сонгоно уу."; return; }
+    if(!pendingImages.length){ err.textContent="Зураг сонгоно уу."; return; }
     var caption=$("#postCaption").value.trim();
     var btn=$("#postBtn"); btn.disabled=true; btn.textContent="Нийтэлж байна…";
     try{
-      await api("POST","/api/posts",{image:pendingImage,caption:caption});
-      pendingImage=null; $("#postCaption").value=""; $("#postImg").value="";
-      $("#postPreview").hidden=true; $("#postFileName").textContent="Зураг сонгоогүй байна";
+      await api("POST","/api/posts",{images:pendingImages,caption:caption});
+      pendingImages=[]; $("#postCaption").value=""; $("#postImg").value="";
+      renderPreviews();
       toast("Мэдээ нийтлэгдлээ"); await loadFeed();
     }catch(ex){ if(ex.message!=="401") err.textContent=ex.message; }
     finally{ btn.disabled=false; btn.textContent="Нийтлэх"; }
@@ -743,16 +779,25 @@ footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8
     list.innerHTML="";
     posts.forEach(function(p){
       var canDel=isAdmin || (me && (p.author===me.name || p.author===me.username));
+      var imgs=(p.images&&p.images.length)?p.images:(p.image?[p.image]:[]);
+      var shown=imgs.slice(0,4);
+      var gcls=imgs.length>=4?"gmore":("g"+Math.min(imgs.length,4));
+      var gallery='<div class="post-gallery '+gcls+'">'+shown.map(function(src,i){
+        var more=(i===3&&imgs.length>4)?(' class="more" data-more="+'+(imgs.length-4)+'"'):'';
+        return '<div'+more+'><img src="'+src+'" data-idx="'+i+'" alt="Ажлын зураг"></div>';
+      }).join("")+'</div>';
       var card=document.createElement("div"); card.className="post";
       card.innerHTML=
-        '<img src="'+p.image+'" alt="Ажлын зураг">'+
+        gallery+
         '<div class="post-body"><div class="post-meta">'+
-        '<span class="post-author">'+esc(p.author||"—")+'</span>'+
+        '<span class="post-author">👤 '+esc(p.author||"—")+'</span>'+
         '<span class="post-date">'+relTime(p.createdAt)+'</span></div>'+
         (p.caption?'<div class="post-caption">'+esc(p.caption)+'</div>':'')+
-        (canDel?'<button class="post-del" title="Устгах">🗑</button>':'')+
+        (canDel?'<button class="post-del" title="Устгах">🗑 Устгах</button>':'')+
         '</div>';
-      card.querySelector("img").addEventListener("click",function(){openLightbox(p.image);});
+      card.querySelectorAll(".post-gallery img").forEach(function(im){
+        im.addEventListener("click",function(){ openLightbox(imgs, parseInt(this.getAttribute("data-idx"),10)||0); });
+      });
       var del=card.querySelector(".post-del");
       if(del) del.addEventListener("click",function(){deletePost(p.id);});
       list.appendChild(card);
@@ -771,9 +816,27 @@ footer.note{color:var(--faint);font-size:11.5px;text-align:center;padding:16px 8
     if(diff<604800) return Math.floor(diff/86400)+" өдрийн өмнө";
     return d.getFullYear()+"/"+(d.getMonth()+1)+"/"+d.getDate();
   }
-  function openLightbox(src){ var lb=$("#lightbox"); lb.querySelector("img").src=src; lb.classList.add("open"); }
+  var lbImgs=[], lbIdx=0;
+  function openLightbox(imgs, idx){
+    lbImgs=Array.isArray(imgs)?imgs:[imgs]; lbIdx=idx||0; showLb();
+    $("#lightbox").classList.add("open");
+  }
+  function showLb(){
+    if(!lbImgs.length) return;
+    lbIdx=(lbIdx+lbImgs.length)%lbImgs.length;
+    $("#lbImg").src=lbImgs[lbIdx];
+    var multi=lbImgs.length>1;
+    $("#lbPrev").hidden=!multi; $("#lbNext").hidden=!multi;
+  }
+  $("#lbPrev").addEventListener("click",function(e){ e.stopPropagation(); lbIdx--; showLb(); });
+  $("#lbNext").addEventListener("click",function(e){ e.stopPropagation(); lbIdx++; showLb(); });
   $("#lightbox").addEventListener("click",function(){ this.classList.remove("open"); });
-  document.addEventListener("keydown",function(e){ if(e.key==="Escape") $("#lightbox").classList.remove("open"); });
+  document.addEventListener("keydown",function(e){
+    if(!$("#lightbox").classList.contains("open")) return;
+    if(e.key==="Escape") $("#lightbox").classList.remove("open");
+    else if(e.key==="ArrowLeft"){ lbIdx--; showLb(); }
+    else if(e.key==="ArrowRight"){ lbIdx++; showLb(); }
+  });
 
   boot();
 })();

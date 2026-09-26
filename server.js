@@ -17,7 +17,7 @@ const JWT_SECRET =
   process.env.SESSION_SECRET || crypto.randomBytes(32).toString("hex");
 const IS_PROD = process.env.NODE_ENV === "production";
 
-app.use(express.json({ limit: "8mb" })); // зураг (base64) хүлээж авахад том хэмжээ
+app.use(express.json({ limit: "24mb" })); // олон зураг (base64) хүлээж авахад том хэмжээ
 app.use(cookieParser());
 
 // ----------------------------- Туслах функцууд -----------------------------
@@ -160,31 +160,35 @@ app.delete("/api/tasks/:id", requireAuth, requireRole(["admin", "editor"]), asyn
 app.get("/api/posts", requireAuth, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      "SELECT id, author_id, author_name, image, caption, created_at FROM posts ORDER BY created_at DESC LIMIT 50");
-    res.json(rows.map((r) => ({
-      id: r.id, authorId: r.author_id, author: r.author_name,
-      image: r.image, caption: r.caption, createdAt: r.created_at,
-    })));
+      "SELECT id, author_id, author_name, image, images, caption, created_at FROM posts ORDER BY created_at DESC LIMIT 50");
+    res.json(rows.map((r) => {
+      let imgs = [];
+      try { imgs = r.images ? JSON.parse(r.images) : (r.image ? [r.image] : []); }
+      catch (e) { imgs = r.image ? [r.image] : []; }
+      return { id: r.id, authorId: r.author_id, author: r.author_name,
+        images: imgs, caption: r.caption, createdAt: r.created_at };
+    }));
   } catch (e) { console.error(e); res.status(500).json({ error: "Серверийн алдаа" }); }
 });
 
 app.post("/api/posts", requireAuth, async (req, res) => {
-  const image = String(req.body.image || "");
+  let images = Array.isArray(req.body.images)
+    ? req.body.images
+    : (req.body.image ? [req.body.image] : []);
+  images = images.filter((im) => typeof im === "string" && im.startsWith("data:image/"));
   const caption = String(req.body.caption || "").trim().slice(0, 1000);
-  if (!image.startsWith("data:image/"))
-    return res.status(400).json({ error: "Зураг оруулна уу" });
-  if (image.length > 7000000)
-    return res.status(400).json({ error: "Зураг хэт том байна (багасгаж оруулна уу)" });
+  if (!images.length) return res.status(400).json({ error: "Зураг оруулна уу" });
+  if (images.length > 12) images = images.slice(0, 12);
+  const total = images.reduce((s, im) => s + im.length, 0);
+  if (total > 22000000)
+    return res.status(400).json({ error: "Зургууд хэт том байна (цөөлж эсвэл багасгаж оруулна уу)" });
   const id = newId();
   try {
     await pool.query(
-      "INSERT INTO posts (id, author_id, author_name, image, caption) VALUES ($1,$2,$3,$4,$5)",
-      [id, req.user.id, req.user.name || req.user.username, image, caption]);
-    const { rows } = await pool.query(
-      "SELECT id, author_id, author_name, image, caption, created_at FROM posts WHERE id=$1", [id]);
-    const r = rows[0];
-    res.json({ id: r.id, authorId: r.author_id, author: r.author_name,
-      image: r.image, caption: r.caption, createdAt: r.created_at });
+      "INSERT INTO posts (id, author_id, author_name, image, images, caption) VALUES ($1,$2,$3,$4,$5,$6)",
+      [id, req.user.id, req.user.name || req.user.username, images[0], JSON.stringify(images), caption]);
+    res.json({ id: id, authorId: req.user.id, author: req.user.name || req.user.username,
+      images: images, caption: caption, createdAt: new Date().toISOString() });
   } catch (e) { console.error(e); res.status(500).json({ error: "Серверийн алдаа" }); }
 });
 
@@ -217,6 +221,8 @@ async function ensureSchema() {
       created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
     );
   `);
+  // Олон зураг хадгалах багана (хуучин хүснэгтэд байхгүй бол нэмнэ)
+  await pool.query("ALTER TABLE posts ADD COLUMN IF NOT EXISTS images TEXT;");
 }
 
 async function seedIfEmpty() {
@@ -233,14 +239,14 @@ async function seedIfEmpty() {
   const pad = (n) => (n < 10 ? "0" + n : "" + n);
   const d = (n) => `${y}-${pad(m + 1)}-${pad(Math.min(Math.max(n, 1), dim))}`;
   const samples = [
-    ["БЕЛАЗ-7555","Тяговый двигатель ДК-724А","Их засвар — ороомог бүрэн солих","Цахилгаан баг №1","Б.Ганбаатар","Зэс ороомог, изоляцийн лак МЛ-92",d(2),d(11),"prog"],
-    ["БЕЛАЗ-75131","Мотор-колесо МК-3510","Подшипник солих, тос сэлбэх","Механик баг","Д.Мөнхбат","Подшипник 32222, тос 80W-90",d(4),d(8),"done"],
-    ["БЕЛАЗ-7513","Тяговый генератор ГСТ-2000","Коллектор зүлгэх, щётка солих","Цахилгаан баг №2","Ц.Отгонбаяр","Графит щётка ЭГ-74",d(6),d(13),"prog"],
-    ["БЕЛАЗ-75306","Тяговый двигатель ЭК-590","Изоляц сэргээх, вакуум шүршилт","Цахилгаан баг №1","Б.Ганбаатар","Компаунд, вакуум насос",d(12),d(20),"plan"],
-    ["БЕЛАЗ-75131","Мотор-колесо МК-3512","Их засвар — редуктор задлан үзлэг","Механик баг","Д.Мөнхбат","Сателлит араа, сальник",d(14),d(24),"plan"],
-    ["БЕЛАЗ-7513","Тяговый двигатель ДК-724Б","Якорь балансжуулах","Цахилгаан баг №2","Ц.Отгонбаяр","Балансын жин, подшипник 6322",d(16),d(21),"plan"],
-    ["БЕЛАЗ-75306","Цэнэглэгч төхөөрөмж","Хүлээн авах туршилт","Электроник баг","С.Энхжаргал","Ачааллын реостат",d(18),d(19),"delay"],
-    ["БЕЛАЗ-7555","Мотор-колесо МК-3510","Ороомог хатаах, лакдах","Цахилгаан баг №1","Б.Ганбаатар","Хатаах зуух, лак",d(22),d(27),"plan"],
+    ["Захиалга №2601","Тяговый двигатель ДК-724А","Их засвар — ороомог бүрэн солих","Цахилгаан баг №1","Б.Ганбаатар","Зэс ороомог, изоляцийн лак МЛ-92",d(2),d(11),"prog"],
+    ["Захиалга №2602","Мотор-колесо МК-3510","Подшипник солих, тос сэлбэх","Механик баг","Д.Мөнхбат","Подшипник 32222, тос 80W-90",d(4),d(8),"done"],
+    ["Захиалга №2603","Тяговый генератор ГСТ-2000","Коллектор зүлгэх, щётка солих","Цахилгаан баг №2","Ц.Отгонбаяр","Графит щётка ЭГ-74",d(6),d(13),"prog"],
+    ["Захиалга №2604","Тяговый двигатель ЭК-590","Изоляц сэргээх, вакуум шүршилт","Цахилгаан баг №1","Б.Ганбаатар","Компаунд, вакуум насос",d(12),d(20),"plan"],
+    ["Захиалга №2605","Мотор-колесо МК-3512","Их засвар — редуктор задлан үзлэг","Механик баг","Д.Мөнхбат","Сателлит араа, сальник",d(14),d(24),"plan"],
+    ["Захиалга №2606","Тяговый двигатель ДК-724Б","Якорь балансжуулах","Цахилгаан баг №2","Ц.Отгонбаяр","Балансын жин, подшипник 6322",d(16),d(21),"plan"],
+    ["Захиалга №2607","Цэнэглэгч төхөөрөмж","Хүлээн авах туршилт","Электроник баг","С.Энхжаргал","Ачааллын реостат",d(18),d(19),"delay"],
+    ["Захиалга №2608","Мотор-колесо МК-3510","Ороомог хатаах, лакдах","Цахилгаан баг №1","Б.Ганбаатар","Хатаах зуух, лак",d(22),d(27),"plan"],
   ];
   for (const s of samples) {
     await pool.query(
